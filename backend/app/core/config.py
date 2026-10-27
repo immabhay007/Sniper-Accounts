@@ -38,10 +38,10 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Database Configuration
-    db_server: str
-    db_name: str
-    db_user: str
-    db_password: str
+    db_server: str = ""
+    db_name: str = ""
+    db_user: str = ""
+    db_password: str = ""
     db_driver: str = "ODBC Driver 18 for SQL Server"
     database_url: str = ""
 
