@@ -4,12 +4,9 @@ Revision ID: 07_remove_opening_balance
 Revises: 06_drop_opening_balance
 Create Date: 2026-05-15 13:00:00.000000
 """
-
 from alembic import op
 import sqlalchemy as sa
 
-
-# revision identifiers, used by Alembic.
 revision = "07_remove_opening_balance"
 down_revision = "06_drop_opening_balance"
 branch_labels = None
@@ -19,13 +16,13 @@ depends_on = None
 def _has_column(table_name: str, column_name: str) -> bool:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
-    columns = inspector.get_columns(table_name)
-    return any(col["name"] == column_name for col in columns)
+    return any(col["name"] == column_name for col in inspector.get_columns(table_name))
 
 
-def _drop_default_constraints(table_name: str, column_name: str) -> None:
-    """Drop any default constraints on a column in SQL Server before dropping the column."""
+def _drop_default_constraint_mssql(table_name: str, column_name: str) -> None:
     bind = op.get_bind()
+    if bind.dialect.name != "mssql":
+        return
     result = bind.execute(
         sa.text(
             """
@@ -45,7 +42,7 @@ def _drop_default_constraints(table_name: str, column_name: str) -> None:
 
 def upgrade() -> None:
     if _has_column("tbl_fund_deposits", "opening_balance"):
-        _drop_default_constraints("tbl_fund_deposits", "opening_balance")
+        _drop_default_constraint_mssql("tbl_fund_deposits", "opening_balance")
         op.drop_column("tbl_fund_deposits", "opening_balance")
 
 

@@ -258,9 +258,9 @@ export const AppLayout = () => {
 
                   <span className="inline-flex items-center px-2">
                     <img
-                      src="/sniper-ai-logo.jpg"
+                      src="/sniper-logo.png"
                       alt="Sniper logo"
-                      className="h-13 w-auto"
+                      className="h-20 w-auto"
                     />
                   </span>
                 </div>
