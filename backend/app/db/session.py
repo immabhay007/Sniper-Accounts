@@ -15,34 +15,39 @@ _session_factory: sessionmaker | None = None
 
 def get_engine() -> Engine:
     """Get or create SQLAlchemy engine singleton."""
-    
+
     global _engine
 
     if _engine is None:
         settings = get_settings()
+        url = settings.sqlalchemy_url
+        is_mssql = url.drivername.startswith("mssql")
 
-        _engine = create_engine(
-            settings.sqlalchemy_url,
-
-            # validates connection before use
+        common_kwargs = dict(
             pool_pre_ping=True,
-
-            # recycle idle connections
             pool_recycle=1800,
-
-            # pool settings
             pool_size=10,
             max_overflow=20,
             pool_timeout=30,
-
-            # useful for debugging
             pool_reset_on_return="rollback",
-
-            connect_args={
-                "TrustServerCertificate": "yes",
-                "timeout": 30,
-            },
         )
+
+        if is_mssql:
+            _engine = create_engine(
+                url,
+                **common_kwargs,
+                connect_args={
+                    "TrustServerCertificate": "yes",
+                    "timeout": 30,
+                },
+            )
+        else:
+            # Postgres (Neon) — sslmode is already in the URL query string
+            _engine = create_engine(
+                url,
+                **common_kwargs,
+                connect_args={"connect_timeout": 30},
+            )
 
     return _engine
 

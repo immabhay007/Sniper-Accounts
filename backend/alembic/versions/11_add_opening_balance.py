@@ -4,21 +4,19 @@ Revision ID: 11_add_opening_balance
 Revises: 10_create_tbl_deposits_bills
 Create Date: 2026-05-19 16:00:00.000000
 """
-
 from alembic import op
 import sqlalchemy as sa
 
-
-# revision identifiers, used by Alembic.
 revision = "11_add_opening_balance"
 down_revision = "10_create_tbl_deposits_bills"
 branch_labels = None
 depends_on = None
 
 
-def _drop_default_constraint(table_name: str, column_name: str) -> None:
-    """Drop SQL Server default constraint for a column if it exists."""
+def _drop_default_constraint_mssql(table_name: str, column_name: str) -> None:
     bind = op.get_bind()
+    if bind.dialect.name != "mssql":
+        return
     result = bind.execute(
         sa.text(
             """
@@ -44,5 +42,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    _drop_default_constraint("tbl_fund_deposits", "opening_balance")
+    _drop_default_constraint_mssql("tbl_fund_deposits", "opening_balance")
     op.drop_column("tbl_fund_deposits", "opening_balance")

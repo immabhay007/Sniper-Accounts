@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     db_user: str
     db_password: str
     db_driver: str = "ODBC Driver 18 for SQL Server"
+    database_url: str = ""
 
     # JWT/Security Configuration
     secret_key: str
@@ -96,8 +97,13 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_url(self) -> URL:
+        if self.database_url:
+            from sqlalchemy.engine import make_url
+            return make_url(self.database_url)
+
+        # Fallback: legacy MSSQL construction (local dev)
         print("=" * 60)
-        print("ACTIVE DATABASE CONFIGURATION")
+        print("ACTIVE DATABASE CONFIGURATION (MSSQL)")
         print("DB_SERVER =", self.db_server)
         print("DB_NAME   =", self.db_name)
         print("DB_USER   =", self.db_user)
